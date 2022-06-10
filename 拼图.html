@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="dog"></div>
+
+ 
+    <!-- 思想： 先创建大图 小图 img  然后在交换位置 重新渲染-->
+
+    <script>
+        var setall = {  //配置
+            maxWidth: 500,
+            maxHeight: 500,
+            low: 3,
+            row: 3,
+            dom: document.getElementById('dog'),
+            url: '../img/500.jpg',
+            isOver: false
+        }
+        setall.width = setall.maxWidth / setall.low
+        setall.height = setall.maxHeight / setall.row
+
+        var bloks = []
+
+        function BloksConfeig(left, top, isvisible) {
+            this.left = left
+            this.top = top
+            this.crTop = this.top
+            this.crLeft = this.left
+            this.dom = document.createElement('div')
+            this.dom.style.width = setall.width + 'px';
+            this.dom.style.height = setall.height + 'px'
+            this.dom.style.background = `url(${setall.url})  -${this.crLeft}px -${this.crTop}px` //重新赋值这里不会
+            this.dom.style.position = 'absolute'
+            this.dom.style.border = '2px solid #fff'
+            this.dom.style.boxSizing = 'border-box'
+            this.dom.style.cursor = 'pointer'
+            var dog = setall.dom
+            this.show = function(){
+            this.dom.style.left = this.left + 'px'
+            this.dom.style.top = this.top + 'px'
+            this.isvisible = isvisible
+            this.dom.style.transition = '.5s'
+           }
+            this.show ()  
+            if (!isvisible) {
+                this.dom.style.display = 'none'
+            }
+           
+            this.isCorrect = function(){      //判断在不在正确位置上
+                return p(this.left,this.crLeft) && p(this.top ,this.crTop)
+            }
+        
+            dog.appendChild(this.dom)
+        }
+        function p(n1,n2) {
+                return parseInt(n1) === parseInt(n2)
+            }
+
+        function game() {
+            initGameDom()
+            blok()
+            shuffle()
+            regEvent()
+
+
+            function regEvent(){
+                var isvisibleBlock = bloks.find(item =>{
+                    return !item.isvisible
+                })
+                bloks.forEach(item =>{
+                     item.dom.onclick = function(){
+
+                        if(setall.isOver) {
+                            return
+                        }
+                        if(item.top === isvisibleBlock.top && p(Math.abs(item.left - isvisibleBlock.left),setall.width) ||
+                           item.left === isvisibleBlock.left && p(Math.abs(item.top - isvisibleBlock.top),setall.height) ) {
+                            exchange(item,isvisibleBlock)
+                            liu()
+
+                           }
+                     
+                     }
+                })
+            }
+
+            function liu(){
+               var cuowu =  bloks.filter(item => {
+                   return !item.isCorrect() 
+                })
+                console.log(cuowu.length)
+                if(cuowu.length === 0) {
+                    bloks.forEach(item =>{
+                        item.dom.style.border = ""
+                        item.dom.style.display = 'block'
+                        setall.isOver = true
+                    })
+                }
+            }
+
+          
+         
+            function exchange(a,b) {
+                    var t = a.left
+                    a.left  = b.left
+                    b.left = t
+                    t = a.top
+                    a.top  = b.top
+                    b.top = t 
+                    a.show()
+                    b.show()
+            }
+
+            function suiji(max,min) {
+            return Math.floor(Math.random() * (max + 1  - min) + min)
+            }
+
+            function shuffle() {
+                for (var i = 0; i < bloks.length -1 ; i++) {
+                  
+                    var index = suiji(0,bloks.length - 2 )
+                    exchange(bloks[i],bloks[index]) 
+                }
+            }
+ 
+
+            function blok() {
+                for (i = 0; i < setall.low; i++) {
+                    for (j = 0; j < setall.row; j++) {
+                        isvisible = true
+                        if (i === setall.low - 1 && j === setall.row - 1) {
+                            isvisible = false
+                        }
+                        var b = new BloksConfeig(j * setall.width, i * setall.height, isvisible)
+                        bloks.push(b)
+                    }
+                }
+
+            }
+            function initGameDom() {
+                var dom = setall.dom
+                dom.style.width = setall.maxWidth + 'px'
+                dom.style.height = setall.maxHeight + 'px'
+                dom.style.border = '2px solid #ccc'
+                dom.style.position = 'relative'
+            }
+           
+        }
+        game()
+
+        console.log()
+    </script>
+</body>
+
+</html>
